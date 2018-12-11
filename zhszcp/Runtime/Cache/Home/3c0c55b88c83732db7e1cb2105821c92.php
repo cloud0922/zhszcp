@@ -1,0 +1,138 @@
+<?php if (!defined('THINK_PATH')) exit();?><!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" type="text/css" href="<?php echo (__EASYUI__); ?>themes/default/easyui.css">
+	<link rel="stylesheet" type="text/css" href="<?php echo (__EASYUI__); ?>themes/icon.css">
+	<script type="text/javascript" src="<?php echo (__EASYUI__); ?>jquery.min.js"></script>
+	<script type="text/javascript" src="<?php echo (__EASYUI__); ?>jquery.easyui.min.js"></script>
+	<style>
+		
+		.panel-header{
+			background:#fff url('<?php echo (__IMAGES__); ?>panel_header_bg.gif') no-repeat top right;
+		}
+		.panel-tool-collapse{
+			background:url('<?php echo (__IMAGES__); ?>arrow_up.gif') no-repeat 0px -3px;
+		}
+		.panel-tool-expand{
+			background:url('<?php echo (__IMAGES__); ?>arrow_down.gif') no-repeat 0px -3px;
+		}
+	</style>
+	
+</head>
+<body>
+	<h2>新增学生</h2>
+	<p></p>
+	
+	<div class="easyui-panel" title="填写学生初始信息" style="width:100%;max-width:400px;padding:30px 60px;">
+		<form id="ff" method="post" action="<?php echo U('Student/test');?>" >
+			<div style="margin-bottom:20px">
+				<input class="easyui-textbox" name="C1" style="width:100%" data-options="label:'姓名:',required:true,missingMessage:'请输入学生姓名'">
+			</div>
+			<div style="margin-bottom:20px">
+				<input class="easyui-textbox" name="C2" style="width:100%" data-options="label:'学号:',required:true">
+			</div>
+			<div style="margin-bottom:20px">
+				<select class="easyui-combobox" name="C3" label="性别:" style="width:100%"><option value="男" selected="selected">男</option><option value="女" >女</option></select>
+			</div>
+			<div style="margin-bottom:20px">
+				<input class="easyui-textbox" name="C4" style="width:100%" data-options="label:'学籍号:',required:true">
+			</div>
+			<div style="margin-bottom:20px">	
+			</div>
+			<input type="hidden" name="class_id" value="<?php echo ($class_id); ?>" /> 
+			<input type="hidden" name="term_id" value="<?php echo ($term_id); ?>" />
+			<input type="hidden" name="C16" id="C16"/>
+		</form>
+		<div class="easyui-panel" title="上传照片" collapsible="true" style="width:100%;">
+			<input type="file" name="upfile" id="imgFile" onchange="imgPreview(this)" style="margin-top:5px;">
+			<img id="preview" style="width:150px;height:200px;margin:0 auto;margin-top:10px;margin-left:50px;"/><br>
+		
+		</div>
+		<div style="margin-bottom:20px">	
+			</div>
+		<div style="text-align:center;padding:5px 0">
+			<a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()" style="width:80px">Submit</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()" style="width:80px">Clear</a>
+		</div>
+	</div>
+	<script>
+		function submitForm(){
+			
+			if($('#imgFile').val()=='')
+			{
+				alert("请上传照片");
+				return false;
+			}
+			$('#ff').form('submit',{
+			url:"<?php echo U('Student/addsubmit');?>",
+			success:function(data){
+			alert(data);
+			$('#ff').form('clear');
+			$('#imgFile').value='';
+			var obj = document.getElementById('imgFile') ; 
+			obj.outerHTML=obj.outerHTML;
+			$('#preview').attr('src','');
+			
+			},
+			});
+		}
+		function submitForm2()
+		{
+			$.ajaxSettings.async = false;
+			$.post("<?php echo U('Student/addsubmit');?>",function (data) {
+			if(data == "ok")
+				{
+					alert("添加成功!");
+					$('#ff').form('clear');
+				}
+			
+			},'json');
+			$.ajaxSettings.async = true;
+		}
+		function clearForm(){
+			$('#ff').form('clear');
+		}
+		function imgPreview(fileDom) {
+        //判断是否支持FileReader
+        if (window.FileReader) {
+            var reader = new FileReader();
+        } else {
+            alert("您的设备不支持图片预览功能，如需该功能请升级您的设备！");
+            window.location.reload(); //刷新当前页面
+        }
+
+        //获取文件
+        var file = fileDom.files[0];
+        var imageType = /^image\//;
+        //是否是图片
+        if (!imageType.test(file.type)) {
+            alert("请选择图片！");
+            window.location.reload(); 
+            return false;
+        }
+        //读取完成
+        reader.onload = function (e) {
+            //获取图片dom
+            var img = document.getElementById("preview");
+            //图片路径设置为读取的图片
+            img.src = e.target.result;
+
+            // ajax 上传图片
+            $.post("<?php echo U('Student/myUpload');?>", {img: e.target.result}, function (ret) {
+                if (ret!= '') {
+                    //alert('upload success');
+					//alert(ret);
+                    //$('#showimg').html('<img src="' + ret.img + '">');
+					$('#C16').val(ret);
+                } else {
+                    alert('upload fail');
+                }
+            }, 'json');
+        };
+        reader.readAsDataURL(file);
+
+    }
+	</script>
+</body>
+</html>
